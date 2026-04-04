@@ -1,0 +1,89 @@
+Analyze go application inside "application_code" folder. 
+Analize Playwright API automation and Playwright Front End automation template inside "playwright_template" folder.
+
+Design an automated quality gate where:
+1. Playwright API automation tests are generated based on the application_code Swagger file 
+2. End-to-End (E2E) frontend tests are generated based on the application_code front end application. Server is up in URL http://localhost:3000/.
+3. Writes those test files into the appropriate test directory and follow some principle:
+ - Test script must use TypeScript languange.
+ - Separate the function between locators, UI action/interaction, validation/assertion, API request, API response, API response validation/assertion.
+ - Make sure the selector is unique, readable, stable. Avoid fragile XPath or index-based (idx) locators.
+ - Front end Assertion must compare the actual state of the application (e.g., text, visibility) against the expected result defined in the test script.
+ - API Assertion must compare the actual state of the application response against the expected result based on Swagger documentation.
+ - Page object should wrap the locators and validation before they called from test script file
+ - Test script must be data driven test
+ - Create a specific file to store testing data in json format, add a new folder ./playwright_template/data/ . This file should contain 2 valid data for Successfully payment process scenario. Testing data must indicate based on Test case number 001.
+ - Any hardcoded UI text or API response text in the validation/locators/spec file should be store inside ./playwright_template/data/uiLabel.ts which has enumeration class. The enum member can be called into any other class to validate the text. 
+
+4. Test generation and execution are integrated into CI Github Action 
+5. The workflow can serve as a production deployment gate
+
+Create CI pipeline where it could automaticaly:
+● Execute the test generation step
+● Run both:
+○ Playwright API tests
+○ Playwright E2E frontend tests
+● Fail the Pull Request if tests fail
+● Produce test logs or artifacts or report
+
+Create Test script for API and UI automation to follow the following test case
+End to end test case title: 001 - Successfully payment process:
+ 
+○ Visit http://localhost:3000/. Verify the page load successfully with title "Secure Checkout" and text "Complete your payment securely"
+○ Enter a valid Email address. Make sure there is no error message appear below the email field.
+○ Enter a valid Card number. Make sure there is no error message appear below the Card number field.
+○ Enter a valid Expiry month and year. Make sure there is no error message appear below the Expiry field.
+○ Enter a valid CVV number. Make sure there is no error message appear below the CVV field.
+○ Enter a valid Amount(USD). Make sure there is no error message appear below the Amount field.
+○ Click Complete Payment. 
+○ Validate success message shown "✅ Payment processed successfully!"
+
+Note the testing data available in the application_code/docs/Swagger files
+Put the generated test spec file in the playwright_template->generated_test folder
+ - Generated test spec files should only contain 1 end to end test for 001 - Successfully payment process
+ - Generated UI test to use a single test case with a loop that iterates through the test data.
+For the scripts folder, include any supporting script here if reference a shell script, python script etc in the pipeline.
+UI test headed is supported.
+
+Files location:
+uiLabels.ts should be inside /data/helpers/ folder
+generated_test folder should be inside /tests/ folder
+Separate the report of API test and UI test.
+
+
+Environment file:
+STAGING_BASE_URL=http://localhost:3000
+STAGING_API_URL=http://localhost:8080
+
+
+
+Important Note:
+1. Do not modify the Playwright configuration template.
+2. All tests must be generated programmatically in the best automation practice.
+
+Suggested Layout
+.
+├── README.md
+├── scripts/
+│ ├── github_action.yaml
+└── generated_test/
+├── utils/
+├── test/
+└── .../
+
+
+Any temporary key must follow:
+● Use environment variables
+● Avoid hardcoding secrets
+● Avoid committing secrets
+● Document how the key is injected locally and in CI
+Follow the Automation test instruction inside this file "LLM_instructions.txt" and update the README.md file at the end of the process. The README must explain:
+1. My LLM prompt design
+2. How Swagger is translated into Playwright tests
+3. How the generation process works
+4. How CI gates production
+5. How this approach scales to many endpoints
+6. How you would prevent or detect incorrect / hallucinated AI-generated tests
+7. How you would handle flaky or unstable tests
+8. How your LLM generates E2E selectors and ensures stability
+9. How you would prevent flaky frontend tests 

@@ -1,0 +1,32 @@
+{
+  "testCase": "001",
+  "description": "Successfully payment process",
+  "validTestData": [
+    {
+      "id": "001-valid-01",
+      "email": "john.doe@example.com",
+      "cardNumber": "4242424242424242",
+      "cardNumberFormatted": "4242 4242 4242 4242",
+      "expiry": "12/26",
+      "cvv": "123",
+      "amount": "50.00"
+    },
+    {
+      "id": "001-valid-02",
+      "email": "jane.smith@test.com",
+      "cardNumber": "5555555555554444",
+      "cardNumberFormatted": "5555 5555 5555 4444",
+      "expiry": "08/27",
+      "cvv": "456",
+      "amount": "99.99"
+    }
+  ],
+  "expectedResults": {
+    "pageTitle": "Secure Checkout",
+    "pageSubtitle": "Complete your payment securely",
+    "successMessage": "✅ Payment processed successfully!",
+    "emailValidationSuccess": true,
+    "cardValidationSuccess": true,
+    "noErrorMessages": true
+  }
+}

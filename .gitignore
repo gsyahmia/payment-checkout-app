@@ -1,0 +1,53 @@
+# Automated Quality Gate - .gitignore
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Test results
+playwright-report/
+test-results/
+flaky-test-results/
+validation-report.md
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
