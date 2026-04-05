@@ -247,11 +247,11 @@ jobs:
           fi
 
   # Comment PR with results
-  - name: Comment PR with results
-    run: |
-      comment="This PR has the results. Please review."
-      gh pr comment ${{ github.event.pull_request.number }} --body "$comment"
-      gh pr comment ${{ github.event.pull_request.number }} --body "Review the results here: ${results_link}"
+      - name: Comment PR with results
+        run: |
+          comment="This PR has the results. Please review."
+          gh pr comment ${{ github.event.pull_request.number }} --body "$comment"
+          gh pr comment ${{ github.event.pull_request.number }} --body "Review the results here: ${results_link}"
 
   # Job 4: Deploy (only on main branch after quality gate passes)
   deploy:
