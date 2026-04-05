@@ -251,13 +251,14 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const fs = require('fs');
+            const apiStatus = '${{ needs.api-tests.result }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
+            const e2eStatus = '${{ needs.e2e-tests.result }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
             
             let comment = '## 🤖 Automated Quality Gate Results\n\n';
             comment += '| Test Suite | Status |\n';
             comment += '|------------|--------|\n';
-            comment += '| 🔌 API Tests | ${{ needs.api-tests.result == \'success\' && \'✅ PASSED\' || \'❌ FAILED\' }} |\n';
-            comment += '| 🌐 E2E Tests | ${{ needs.e2e-tests.result == \'success\' && \'✅ PASSED\' || \'❌ FAILED\' }} |\n\n';
+            comment += '| 🔌 API Tests | ' + apiStatus + ' |\n';
+            comment += '| 🌐 E2E Tests | ' + e2eStatus + ' |\n\n';
             
             if ('${{ needs.api-tests.result }}' === 'success' && '${{ needs.e2e-tests.result }}' === 'success') {
               comment += '### 🎉 All tests passed! This PR is ready to merge.\n';
