@@ -246,13 +246,34 @@ jobs:
             echo "All tests passed - ready for deployment"
           fi
 
-  # Comment PR with results
       - name: Comment PR with results
-        run: |
-          comment="This PR has the results. Please review."
-          gh pr comment ${{ github.event.pull_request.number }} --body "$comment"
-          gh pr comment ${{ github.event.pull_request.number }} --body "Review the results here: ${results_link}"
-
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const apiStatus = '${{ needs.api-tests.result }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
+            const e2eStatus = '${{ needs.e2e-tests.result }}' === 'success' ? '✅ PASSED' : '❌ FAILED';
+            
+            let comment = '## 🤖 Automated Quality Gate Results\n\n';
+            comment += '| Test Suite | Status |\n';
+            comment += '|------------|--------|\n';
+            comment += '| 🔌 API Tests | ' + apiStatus + ' |\n';
+            comment += '| 🌐 E2E Tests | ' + e2eStatus + ' |\n\n';
+            
+            if ('${{ needs.api-tests.result }}' === 'success' && '${{ needs.e2e-tests.result }}' === 'success') {
+              comment += '### 🎉 All tests passed! This PR is ready to merge.\n';
+            } else {
+              comment += '### ⚠️ Some tests failed. Please review the test results before merging.\n';
+            }
+            
+            comment += '\n📊 [View detailed test report in the Actions tab](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
   # Job 4: Deploy (only on main branch after quality gate passes)
   deploy:
     name: 🚀 Deploy to Production
