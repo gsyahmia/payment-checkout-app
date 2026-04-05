@@ -1,5 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
 import { UILabels } from '../../data/helpers/uiLabels';
+import { TimeoutConfig } from '../../utils/generated/timeout-config';
 
 /**
  * CheckoutPage - Page Object Model for Secure Checkout Page
@@ -86,7 +87,7 @@ export class CheckoutPage {
     // 'domcontentloaded' is sufficient for most tests and 3-5x faster than 'networkidle'
     await this.page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
     // Wait for the page title to be visible (indicates page is ready)
-    await this.pageTitle.waitFor({ state: 'visible', timeout: 5000 });
+    await this.pageTitle.waitFor({ state: 'visible', timeout: TimeoutConfig.PAGE_LOAD_TIMEOUT });
   }
 
   // Form Interaction Actions
@@ -118,13 +119,13 @@ export class CheckoutPage {
   async triggerEmailValidation() {
     await this.emailInput.blur();
     // Reduced timeout - only wait for debounce, not full validation
-    await this.page.waitForTimeout(100);
+    await this.page.waitForTimeout(TimeoutConfig.DEBOUNCE_DELAY);
   }
 
   async triggerCardValidation() {
     await this.cardNumberInput.blur();
     // Reduced timeout - only wait for debounce, not full validation
-    await this.page.waitForTimeout(100);
+    await this.page.waitForTimeout(TimeoutConfig.DEBOUNCE_DELAY);
   }
 
   async clickCompletePayment() {
@@ -205,12 +206,12 @@ export class CheckoutPage {
 
   async validateEmailValidationSuccess() {
     // Wait for the green border class to appear instead of arbitrary timeout
-    await expect(this.emailInput).toHaveClass(/border-green-400/, { timeout: 3000 });
+    await expect(this.emailInput).toHaveClass(/border-green-400/, { timeout: TimeoutConfig.CLASS_CHANGE_TIMEOUT });
   }
 
   async validateCardValidationSuccess() {
     // Wait for the green border class to appear instead of arbitrary timeout
-    await expect(this.cardNumberInput).toHaveClass(/border-green-400/, { timeout: 3000 });
+    await expect(this.cardNumberInput).toHaveClass(/border-green-400/, { timeout: TimeoutConfig.CLASS_CHANGE_TIMEOUT });
   }
 
   // Wait Helpers - Optimized to wait for actual validation completion instead of arbitrary timeouts
@@ -218,30 +219,30 @@ export class CheckoutPage {
     // Wait for the validation spinner to disappear (indicates validation is complete)
     // This is much faster than waiting a fixed 1500ms
     try {
-      await this.emailValidatingSpinner.waitFor({ state: 'hidden', timeout: 3000 });
+      await this.emailValidatingSpinner.waitFor({ state: 'hidden', timeout: TimeoutConfig.VALIDATION_TIMEOUT });
     } catch {
       // If spinner doesn't appear/disappear, just wait a short time
-      await this.page.waitForTimeout(300);
+      await this.page.waitForTimeout(TimeoutConfig.VALIDATION_FALLBACK);
     }
   }
 
   async waitForCardValidation() {
     // Wait for the validation spinner to disappear (indicates validation is complete)
     try {
-      await this.cardValidatingSpinner.waitFor({ state: 'hidden', timeout: 3000 });
+      await this.cardValidatingSpinner.waitFor({ state: 'hidden', timeout: TimeoutConfig.VALIDATION_TIMEOUT });
     } catch {
       // If spinner doesn't appear/disappear, just wait a short time
-      await this.page.waitForTimeout(300);
+      await this.page.waitForTimeout(TimeoutConfig.VALIDATION_FALLBACK);
     }
   }
 
   async waitForPaymentProcessing() {
     // Wait for success/error message to appear instead of arbitrary timeout
     try {
-      await this.successMessage.waitFor({ state: 'visible', timeout: 5000 });
+      await this.successMessage.waitFor({ state: 'visible', timeout: TimeoutConfig.PAYMENT_PROCESSING_TIMEOUT });
     } catch {
       // Fallback to shorter timeout if message doesn't appear
-      await this.page.waitForTimeout(500);
+      await this.page.waitForTimeout(TimeoutConfig.PAYMENT_FALLBACK);
     }
   }
 }
