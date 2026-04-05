@@ -14,57 +14,10 @@ env:
   API_URL: 'http://localhost:8080'
 
 jobs:
-  # Job 1: Generate Tests from Swagger
-  generate-tests:
-    name: 🤖 Generate Tests from Swagger
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: playwright_template/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./playwright_template
-        run: npm ci
-
-      - name: Install Playwright browsers
-        working-directory: ./playwright_template
-        run: npx playwright install --with-deps chromium
-
-      - name: Verify Swagger file exists
-        run: |
-          if [ ! -f "application_code/docs/swagger.json" ]; then
-            echo "❌ Swagger file not found!"
-            exit 1
-          fi
-          echo "✅ Swagger file found"
-
-      - name: Generate API tests from Swagger
-        working-directory: ./playwright_template
-        run: |
-          echo "🔧 Test generation completed"
-          echo "✅ API tests are pre-generated in generated_test/api/"
-          ls -la generated_test/api/
-
-      - name: Upload generated tests
-        uses: actions/upload-artifact@v4
-        with:
-          name: generated-tests
-          path: playwright_template/generated_test/
-          retention-days: 7
-
-  # Job 2: Backend API Tests
+  # Job 1: Backend API Tests
   api-tests:
     name: 🔌 API Tests (Backend)
     runs-on: ubuntu-latest
-    needs: generate-tests
     
     steps:
       - name: Checkout code
@@ -123,11 +76,10 @@ jobs:
             kill $(cat backend.pid) || true
           fi
 
-  # Job 3: E2E Frontend Tests
+  # Job 2: E2E Frontend Tests
   e2e-tests:
     name: 🌐 E2E Tests (Frontend)
     runs-on: ubuntu-latest
-    needs: generate-tests
     
     steps:
       - name: Checkout code
@@ -214,7 +166,7 @@ jobs:
             kill $(cat backend.pid) || true
           fi
 
-  # Job 4: Quality Gate - Aggregate Results
+  # Job 3: Quality Gate - Aggregate Results
   quality-gate:
     name: 🚦 Quality Gate
     runs-on: ubuntu-latest
@@ -308,7 +260,7 @@ jobs:
               body: comment
             });
 
-  # Job 5: Deploy (only on main branch after quality gate passes)
+  # Job 4: Deploy (only on main branch after quality gate passes)
   deploy:
     name: 🚀 Deploy to Production
     runs-on: ubuntu-latest
