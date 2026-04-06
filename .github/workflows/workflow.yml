@@ -77,9 +77,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: api-test-results
-          path: |
-            playwright_template/playwright-report/
-            playwright_template/test-results/
+          path: playwright_template/playwright-report-api/
           retention-days: 30
 
       - name: Stop Backend
@@ -170,9 +168,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: e2e-test-results
-          path: |
-            playwright_template/playwright-report/
-            playwright_template/test-results/
+          path: playwright_template/playwright-report-ui/
           retention-days: 30
 
       - name: Upload test videos on failure
@@ -223,8 +219,8 @@ jobs:
           E2E_PASSED=true
           
           # Check API results
-          if [ -d "./api-results/test-results" ]; then
-            API_FAILURES=$(find ./api-results/test-results -name "*.xml" -exec grep -l 'failures="[1-9]' {} \; | wc -l)
+          if [ -d "./api-results" ]; then
+            API_FAILURES=$(find ./api-results -name "*.xml" -exec grep -l 'failures="[1-9]' {} \; | wc -l)
             if [ "$API_FAILURES" -gt 0 ]; then
               echo "❌ API Tests: FAILED ($API_FAILURES failures)"
               API_PASSED=false
@@ -232,15 +228,13 @@ jobs:
               echo "✅ API Tests: PASSED"
             fi
           else
-            echo "⚠️  API test results not found - checking if upstream job failed"
-            # List what was actually downloaded
-            [ -d "./api-results" ] && ls -R ./api-results || echo "No api-results directory"
+            echo "⚠️  API test results not found"
             API_PASSED=false
           fi
           
           # Check E2E results
-          if [ -d "./e2e-results/test-results" ]; then
-            E2E_FAILURES=$(find ./e2e-results/test-results -name "*.xml" -exec grep -l 'failures="[1-9]' {} \; | wc -l)
+          if [ -d "./e2e-results" ]; then
+            E2E_FAILURES=$(find ./e2e-results -name "*.xml" -exec grep -l 'failures="[1-9]' {} \; | wc -l)
             if [ "$E2E_FAILURES" -gt 0 ]; then
               echo "❌ E2E Tests: FAILED ($E2E_FAILURES failures)"
               E2E_PASSED=false
@@ -248,8 +242,7 @@ jobs:
               echo "✅ E2E Tests: PASSED"
             fi
           else
-            echo "⚠️  E2E test results not found - checking if upstream job failed"
-            [ -d "./e2e-results" ] && ls -R ./e2e-results || echo "No e2e-results directory"
+            echo "⚠️  E2E test results not found"
             E2E_PASSED=false
           fi
           
