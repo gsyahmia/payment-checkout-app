@@ -62,6 +62,13 @@ jobs:
         working-directory: ./playwright_template
         run: |
           npx playwright test tests/generated_test/api/ --reporter=html,json,junit
+          # Verify test results were generated
+          if [ ! -d "test-results" ]; then
+            echo "ERROR: test-results directory not found!"
+            ls -la
+            exit 1
+          fi
+          find test-results -name "*.xml" | head -5
         env:
           API_BASE_URL: ${{ env.API_URL }}
 
@@ -148,6 +155,13 @@ jobs:
         working-directory: ./playwright_template
         run: |
           npx playwright test tests/generated_test/e2e/ --reporter=html,json,junit
+          # Verify test results were generated
+          if [ ! -d "test-results" ]; then
+            echo "ERROR: test-results directory not found!"
+            ls -la
+            exit 1
+          fi
+          find test-results -name "*.xml" | head -5
         env:
           BASE_URL: ${{ env.BASE_URL }}
 
@@ -205,10 +219,10 @@ jobs:
           echo "📊 Quality Gate Evaluation"
           echo "=========================="
           
-          # Check if test result files exist
           API_PASSED=true
           E2E_PASSED=true
           
+          # Check API results
           if [ -d "./api-results/test-results" ]; then
             API_FAILURES=$(find ./api-results/test-results -name "*.xml" -exec grep -l 'failures="[1-9]' {} \; | wc -l)
             if [ "$API_FAILURES" -gt 0 ]; then
@@ -218,10 +232,13 @@ jobs:
               echo "✅ API Tests: PASSED"
             fi
           else
-            echo "⚠️  API test results not found"
+            echo "⚠️  API test results not found - checking if upstream job failed"
+            # List what was actually downloaded
+            [ -d "./api-results" ] && ls -R ./api-results || echo "No api-results directory"
             API_PASSED=false
           fi
           
+          # Check E2E results
           if [ -d "./e2e-results/test-results" ]; then
             E2E_FAILURES=$(find ./e2e-results/test-results -name "*.xml" -exec grep -l 'failures="[1-9]' {} \; | wc -l)
             if [ "$E2E_FAILURES" -gt 0 ]; then
@@ -231,7 +248,8 @@ jobs:
               echo "✅ E2E Tests: PASSED"
             fi
           else
-            echo "⚠️  E2E test results not found"
+            echo "⚠️  E2E test results not found - checking if upstream job failed"
+            [ -d "./e2e-results" ] && ls -R ./e2e-results || echo "No e2e-results directory"
             E2E_PASSED=false
           fi
           
@@ -239,7 +257,7 @@ jobs:
           
           if [ "$API_PASSED" = false ] || [ "$E2E_PASSED" = false ]; then
             echo "🚫 Quality Gate: FAILED"
-            echo "Deployment blocked due to test failures"
+            echo "Deployment blocked due to test failures or missing results"
             exit 1
           else
             echo "🎉 Quality Gate: PASSED"
