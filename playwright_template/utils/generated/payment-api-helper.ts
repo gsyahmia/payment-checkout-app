@@ -1,5 +1,5 @@
 import { APIRequestContext, expect } from '@playwright/test';
-import { APIMessages, APIEndpoints, APIStatus } from '../../data/helpers/uiLabels';
+import { APIMessages, APIEndpoints, APIStatus } from '../../data/helpers/apiMessages';
 
 /**
  * PaymentAPIHelper - API Testing Utilities for Payment API
