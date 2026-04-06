@@ -87,3 +87,47 @@ Follow the Automation test instruction inside this file "LLM_instructions.txt" a
 7. How you would handle flaky or unstable tests
 8. How your LLM generates E2E selectors and ensures stability
 9. How you would prevent flaky frontend tests 
+
+
+Generate GitHub Actions Workflow
+Project Setup
+Monorepo with Go backend + Next.js frontend + Playwright tests
+
+Stack:
+
+Backend: Go 1.21 at application_code → localhost:8080
+Frontend: Next.js at application_code → localhost:3000
+Tests: Playwright at generated_test
+Workflow Goal
+Create 4-job CI/CD pipeline: api-tests → e2e-tests → quality-gate → deploy
+
+Job 1: api-tests
+
+1. Setup: Go + Node + Playwright deps
+2. Create .env with TEST_ENV, STAGING_BASE_URL, STAGING_API_URL
+3. Start Go backend (background, save PID)
+4. Run: npx playwright test tests/generated_test/api/
+5. Upload artifact: playwright-report-api/
+
+Job 2: e2e-tests
+1. Setup: Go + Node + Playwright + browsers
+2. Create .env (same as Job 1)
+3. Start Go backend + Next.js frontend 
+4. Run: npx playwright test tests/generated_test/e2e/
+5. Upload artifacts: playwright-report-ui/ + videos (on failure)
+
+Job 3: quality-gate (needs: [api-tests, e2e-tests]
+1. Download both test artifacts
+2. Check for test failures in XML files 
+3. Exit 1 if any failures or missing results
+4. Comment on PR with test status table
+
+Job 4: deploy (needs: quality-gate, if: main + push + quality-gate passed)
+Key Config
+Triggers: PR + push to main/develop
+Env vars: NODE_VERSION=20, GO_VERSION=1.21, BASE_URL, API_URL
+Permissions: pull-requests: write
+
+
+Path Details
+Artifact paths: Use playwright-report-api/ and playwright-report-ui/ (not test-results/)
